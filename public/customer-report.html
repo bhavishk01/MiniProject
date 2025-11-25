@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Report Illegal Mining</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body class="bg-earth">
+  <div class="bg-cover"></div>
+  <div class="site-header"><div class="container nav"><span class="brand">EarthLink</span><span class="spacer"></span><a href="/">Home</a><a href="/customer-market.html">Marketplace</a><a href="/customer-report.html">Report</a></div></div>
+  <div class="container">
+    <h2>Report Illegal Mining</h2>
+    <p><a href="/customer-market.html">Back to Marketplace</a></p>
+    <form id="form">
+      <textarea id="description" placeholder="Describe the incident"></textarea>
+      <input type="text" id="location" placeholder="Location" />
+      <div>
+        <button type="button" id="geo">Use Current Location</button>
+      </div>
+      <input type="file" id="photo" accept="image/*" />
+      <button type="submit">Submit Report</button>
+    </form>
+  </div>
+  <script>
+    let lat=null;let lng=null;
+    document.getElementById('geo').onclick=()=>{
+      if(!navigator.geolocation){alert('Geolocation not available');return}
+      navigator.geolocation.getCurrentPosition(p=>{lat=p.coords.latitude;lng=p.coords.longitude;},()=>{alert('Unable to get location')});
+    };
+    function token(){return localStorage.getItem('token')||''}
+    document.getElementById('form').addEventListener('submit',async(e)=>{
+      e.preventDefault();
+      const fd=new FormData();
+      fd.append('description',document.getElementById('description').value);
+      fd.append('location',document.getElementById('location').value);
+      if(lat!==null) fd.append('latitude',String(lat));
+      if(lng!==null) fd.append('longitude',String(lng));
+      const file=document.getElementById('photo').files[0];
+      if(file) fd.append('photo',file);
+      const r=await fetch('/api/reports',{method:'POST',headers:{Authorization:'Bearer '+token()},body:fd});
+      if(!r.ok) alert('Report failed'); else {alert('Report submitted'); location.href='/customer-market.html'}
+    });
+    if(!token()) location.href='/login-customer.html';
+  </script>
+</body>
+</html>

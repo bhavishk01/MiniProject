@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dealer Registration</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body class="bg-earth">
+  <div class="bg-cover"></div>
+  <div class="site-header"><div class="container nav"><span class="brand">EarthLink</span><span class="spacer"></span><a href="/">Home</a><a href="/login-dealer.html">Dealer Login</a></div></div>
+  <div class="container"><div class="card">
+    <h2>Dealer Registration</h2>
+    <p><a href="/">Home</a> | <a href="/login-dealer.html">Back to Dealer Login</a></p>
+    <form id="form">
+      <input type="text" id="name" placeholder="Name" required />
+      <input type="email" id="email" placeholder="Email" required />
+      <input type="password" id="password" placeholder="Password" required />
+      <input type="text" id="company" placeholder="Company (optional)" />
+      <input type="file" id="license" accept="image/*,application/pdf" required />
+      <button type="submit">Apply</button>
+      <div class="msg" id="msg"></div>
+      <div class="error" id="error"></div>
+    </form>
+  </div></div>
+  <script>
+    document.getElementById('form').addEventListener('submit',async(e)=>{
+      e.preventDefault();
+      const fd=new FormData();
+      fd.append('name',document.getElementById('name').value);
+      fd.append('email',document.getElementById('email').value);
+      fd.append('password',document.getElementById('password').value);
+      fd.append('company',document.getElementById('company').value);
+      const file=document.getElementById('license').files[0];
+      if(file) fd.append('license',file);
+      let data=null; let text='';
+      const r=await fetch('/api/dealers/apply',{method:'POST',body:fd});
+      try{ text=await r.text(); data=JSON.parse(text);}catch{ data=null }
+      if(!r.ok){document.getElementById('error').textContent=(data&&data.error)?data.error:(text||'Application failed');document.getElementById('msg').textContent='';return}
+      document.getElementById('msg').textContent='Application submitted. Wait for approval by officials.';
+      document.getElementById('error').textContent='';
+    });
+  </script>
+</body>
+</html>

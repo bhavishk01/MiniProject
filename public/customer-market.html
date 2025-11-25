@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Marketplace</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body class="bg-earth">
+  <div class="bg-cover"></div>
+  <div class="site-header"><div class="container nav"><span class="brand">EarthLink</span><span class="spacer"></span><a href="/">Home</a><a href="/customer-market.html">Marketplace</a><a href="/customer-report.html">Report</a></div></div>
+  <div class="container">
+    <h2>Marketplace</h2>
+    <p><a href="/">Home</a> | <a href="/customer-report.html">Report Illegal Mining</a></p>
+    <div class="actions">
+      <label>Material</label>
+      <select id="filter"><option value="">All</option><option value="sand">Sand</option><option value="red_soil">Red Soil</option><option value="aggregate_stone">Aggregate Stone</option><option value="crushed_aggregate_stone">Crushed Aggregate Stone</option><option value="red_laterite_stone">Red Laterite Stone</option></select>
+      <label>Location</label>
+      <input id="loc" placeholder="Search location" />
+      <button onclick="load()">Apply</button>
+    </div>
+    <table>
+      <thead><tr><th>Dealer</th><th>Material</th><th>Quantity</th><th>Unit</th><th>Location</th><th>Action</th></tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+  </div>
+  <script>
+    function token(){return localStorage.getItem('token')||''}
+    function role(){return localStorage.getItem('role')||''}
+    async function load(){
+      const filter=document.getElementById('filter').value;
+      const loc=document.getElementById('loc').value;
+      const qs=new URLSearchParams();
+      if(filter) qs.set('material',filter);
+      if(loc) qs.set('location',loc);
+      const r=await fetch('/api/market/uploads'+(qs.toString()?`?${qs.toString()}`:''),{cache:'no-store'});
+      const data=await r.json();
+      const rows=document.getElementById('rows');
+      rows.innerHTML='';
+      if(data.length===0){
+        const tr=document.createElement('tr');
+        tr.innerHTML='<td colspan="6">No results found</td>';
+        rows.appendChild(tr);
+        return;
+      }
+      data.forEach(x=>{
+        const tr=document.createElement('tr');
+        const available = (x.available_quantity ?? x.quantity);
+        const action=`<div class='actions'><input type='number' step='0.01' min='0.01' value='1' max='${available}' placeholder='Qty' id='q-${x.id}' /><button onclick='order(${x.dealer_id},"${x.material}",${x.id},"q-${x.id}")'>Request</button></div>`;
+        tr.innerHTML=`<td>${x.dealer_name}</td><td>${x.material}</td><td>${available}</td><td>${x.unit}</td><td>${x.location||''}</td><td>${action}</td>`;
+        rows.appendChild(tr);
+      });
+    }
+    async function order(dealerId,material,uploadId,qid){
+      if(role()!=='customer'){location.href='/login-customer.html';return}
+      const qtyStr=document.getElementById(qid).value;
+      const qty=Number(qtyStr);
+      if(!qty || qty<=0){alert('Please enter a valid quantity');return}
+      const r=await fetch('/api/orders',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token()},body:JSON.stringify({dealer_id:dealerId,material,quantity:qty,upload_id:uploadId})});
+      if(!r.ok){
+        let msg='Order failed';
+        try{const t=await r.json(); if(t && t.error) msg=t.error;}catch{}
+        alert(msg);
+      } else {
+        alert('Order requested');
+        load();
+      }
+    }
+    document.getElementById('filter').onchange=load;
+    document.getElementById('loc').addEventListener('keyup',e=>{if(e.key==='Enter') load()});
+    if(!token()||role()!=='customer') location.href='/login-customer.html';
+    load();
+  </script>
+</body>
+</html>

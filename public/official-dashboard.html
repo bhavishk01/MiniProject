@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Official Dashboard</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body class="bg-earth">
+  <div class="bg-cover"></div>
+  <div class="site-header"><div class="container nav"><span class="brand">EarthLink</span><span class="spacer"></span><a href="/">Home</a><a href="/official-dealer-approvals.html">Dealer Approvals</a><a href="/official-account.html">Account</a></div></div>
+  <div class="container">
+    <h2>Government Official Dashboard</h2>
+    <p><a href="/">Home</a> | <a href="/official-account.html">Account</a> | <a href="/official-dealer-approvals.html">Dealer Approvals</a></p>
+    <h3>Illegal Mining Reports</h3>
+    <div class="actions"><label>Location</label><input id="repLoc" placeholder="Filter location" /><button onclick="loadReports()">Apply</button></div>
+    <table>
+      <thead><tr><th>Photo</th><th>Description</th><th>Location</th><th>Coordinates</th><th>Status</th><th>Reporter</th><th>Action</th></tr></thead>
+      <tbody id="reports"></tbody>
+    </table>
+    <h3>Dealer Uploads</h3>
+    <div class="actions"><label>Material</label>
+      <select id="mat"><option value="">All</option><option value="sand">Sand</option><option value="red_soil">Red Soil</option><option value="aggregate_stone">Aggregate Stone</option><option value="crushed_aggregate_stone">Crushed Aggregate Stone</option><option value="red_laterite_stone">Red Laterite Stone</option></select>
+      <label>Location</label><input id="uplLoc" placeholder="Filter location" />
+      <button onclick="loadUploads()">Apply</button>
+    </div>
+    <table>
+      <thead><tr><th>Dealer</th><th>Available</th><th>Unit</th><th>Location</th><th>Date</th></tr></thead>
+      <tbody id="uploads"></tbody>
+    </table>
+  </div>
+  <script>
+    function token(){return localStorage.getItem('token')||''}
+    async function loadReports(){
+      const loc=document.getElementById('repLoc').value;
+      const qs=new URLSearchParams(); if(loc) qs.set('location',loc);
+      const r=await fetch('/api/reports'+(qs.toString()?`?${qs.toString()}`:''),{headers:{Authorization:'Bearer '+token()},cache:'no-store'});
+      const data=await r.json();
+      const tbody=document.getElementById('reports');
+      tbody.innerHTML='';
+      data.forEach(x=>{
+        const tr=document.createElement('tr');
+        const photo=x.photo_path?`<img src='/${x.photo_path}'/>`:'';
+        const action=`<select id='s-${x.id}'><option value='pending' ${x.status==='pending'?'selected':''}>Pending</option><option value='reviewed' ${x.status==='reviewed'?'selected':''}>Reviewed</option><option value='action_taken' ${x.status==='action_taken'?'selected':''}>Action Taken</option></select><button onclick='updateStatus(${x.id})'>Update</button>`;
+        tr.innerHTML=`<td>${photo}</td><td>${x.description||''}</td><td>${x.location||''}</td><td>${x.latitude||''}, ${x.longitude||''}</td><td>${x.status}</td><td>${x.reporter_name}</td><td>${action}</td>`;
+        tbody.appendChild(tr);
+      });
+    }
+    async function loadUploads(){
+      const mat=document.getElementById('mat').value;
+      const loc=document.getElementById('uplLoc').value;
+      const qs=new URLSearchParams(); if(mat) qs.set('material',mat); if(loc) qs.set('location',loc);
+      const r=await fetch('/api/market/uploads'+(qs.toString()?`?${qs.toString()}`:''),{cache:'no-store'});
+      const data=await r.json();
+      const tbody=document.getElementById('uploads');
+      tbody.innerHTML='';
+      data.forEach(x=>{
+        const tr=document.createElement('tr');
+        const available=(x.available_quantity??x.quantity);
+        tr.innerHTML=`<td>${x.dealer_name}</td><td>${available} ${x.material}</td><td>${x.unit}</td><td>${x.location||''}</td><td>${new Date(x.created_at).toLocaleString()}</td>`;
+        tbody.appendChild(tr);
+      });
+    }
+    async function updateStatus(id){
+      const s=document.getElementById('s-'+id).value;
+      const r=await fetch('/api/reports/'+id+'/status',{method:'PATCH',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token()},body:JSON.stringify({status:s})});
+      if(!r.ok) alert('Update failed'); else loadReports();
+    }
+    document.getElementById('repLoc').addEventListener('keyup',e=>{if(e.key==='Enter') loadReports()});
+    document.getElementById('uplLoc').addEventListener('keyup',e=>{if(e.key==='Enter') loadUploads()});
+    if(!token()) location.href='/login-official.html';
+    loadReports();
+    loadUploads();
+  </script>
+</body>
+</html>

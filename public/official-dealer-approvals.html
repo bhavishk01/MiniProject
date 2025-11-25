@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dealer Approvals</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body class="bg-earth">
+  <div class="bg-cover"></div>
+  <div class="site-header"><div class="container nav"><span class="brand">EarthLink</span><span class="spacer"></span><a href="/">Home</a><a href="/official-dashboard.html">Dashboard</a></div></div>
+  <div class="container">
+    <h2>Dealer Applications</h2>
+    <p><a href="/">Home</a> | <a href="/official-dashboard.html">Dashboard</a></p>
+    <div>
+      <label>Status</label>
+      <select id="status">
+        <option value="pending">Pending</option>
+        <option value="approved">Approved</option>
+        <option value="rejected">Rejected</option>
+      </select>
+    </div>
+    <table>
+      <thead><tr><th>Name</th><th>Email</th><th>Company</th><th>License</th><th>Applied At</th><th>Action</th></tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+  </div>
+  <script>
+    function token(){return localStorage.getItem('token')||''}
+    if(localStorage.getItem('role')!=='official' || !token()) location.href='/login-official.html';
+    async function load(){
+      const status=document.getElementById('status').value;
+      const r=await fetch('/api/dealers/applications?status='+status,{headers:{Authorization:'Bearer '+token()}});
+      const data=await r.json();
+      const rows=document.getElementById('rows');
+      rows.innerHTML='';
+      data.forEach(x=>{
+        const tr=document.createElement('tr');
+        const license=x.license_path?`<a target='_blank' href='/${x.license_path}'>View</a>`:'';
+        const action=status==='pending'?`<button onclick='update(${x.id},"approved")'>Approve</button><button onclick='update(${x.id},"rejected")'>Reject</button>`:'';
+        tr.innerHTML=`<td>${x.name}</td><td>${x.email}</td><td>${x.company||''}</td><td>${license}</td><td>${new Date(x.created_at).toLocaleString()}</td><td>${action}</td>`;
+        rows.appendChild(tr);
+      });
+    }
+    async function update(id,status){
+      const r=await fetch('/api/dealers/applications/'+id+'/status',{method:'PATCH',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token()},body:JSON.stringify({status})});
+      if(!r.ok) alert('Update failed'); else load();
+    }
+    document.getElementById('status').onchange=load;
+    load();
+  </script>
+</body>
+</html>

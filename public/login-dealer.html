@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dealer Login</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body class="bg-earth">
+  <div class="bg-cover"></div>
+  <div class="site-header"><div class="container nav"><span class="brand">EarthLink</span><span class="spacer"></span><a href="/">Home</a></div></div>
+  <div class="container"><div class="card card-glass">
+    <h2>Dealer Login</h2>
+    <p><a href="/dealer-register.html">Register as Dealer</a></p>
+    <form id="form">
+      <input type="email" id="email" placeholder="Email" required />
+      <input type="password" id="password" placeholder="Password" required />
+      <button type="submit">Login</button>
+      <div class="error" id="error"></div>
+    </form>
+  </div></div>
+  <script>
+    const form=document.getElementById('form');
+    form.addEventListener('submit',async(e)=>{
+      e.preventDefault();
+      const email=document.getElementById('email').value;
+      const password=document.getElementById('password').value;
+      const r=await fetch('/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password,role:'dealer'})});
+      const data=await r.json();
+      if(!r.ok){document.getElementById('error').textContent=data.error||'Login failed';return}
+      localStorage.setItem('token',data.token);
+      localStorage.setItem('role','dealer');
+      location.href='/dealer-dashboard.html';
+    });
+  </script>
+</body>
+</html>

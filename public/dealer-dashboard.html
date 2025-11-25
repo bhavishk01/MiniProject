@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dealer Dashboard</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body class="bg-earth">
+  <div class="bg-cover"></div>
+  <div class="site-header"><div class="container nav"><span class="brand">EarthLink</span><span class="spacer"></span><a href="/">Home</a><a href="/customer-market.html">Marketplace</a></div></div>
+  <div class="container">
+    <h2>Dealer Dashboard</h2>
+    <p><a href="/">Home</a></p>
+    <div>
+      <h3>Upload Mining Data</h3>
+      <div class="error" id="error"></div>
+      <form id="form">
+        <select id="material">
+          <option value="sand">Sand</option>
+          <option value="red_soil">Red Soil</option>
+          <option value="aggregate_stone">Aggregate Stone</option>
+          <option value="crushed_aggregate_stone">Crushed Aggregate Stone</option>
+          <option value="red_laterite_stone">Red Laterite Stone</option>
+        </select>
+        <input id="quantity" type="number" step="0.01" placeholder="Quantity" required />
+        <input id="unit" placeholder="Unit" required />
+        <input id="location" placeholder="Location" />
+        <button type="submit">Upload</button>
+      </form>
+    </div>
+    <div>
+      <h3>Your Uploads</h3>
+      <table>
+        <thead><tr><th>Material</th><th>Available</th><th>Unit</th><th>Location</th><th>Date</th></tr></thead>
+        <tbody id="uploads"></tbody>
+      </table>
+    </div>
+    <div>
+      <h3>Customer Requests</h3>
+      <table>
+        <thead><tr><th>Customer</th><th>Material</th><th>Quantity</th><th>Status</th><th>Action</th></tr></thead>
+        <tbody id="orders"></tbody>
+      </table>
+    </div>
+  </div>
+  <script>
+    function token(){return localStorage.getItem('token')||''}
+    if(localStorage.getItem('role')!=='dealer') location.href='/login-dealer.html';
+    async function loadUploads(){
+      const r=await fetch('/api/dealer/uploads',{headers:{Authorization:'Bearer '+token()}});
+      if(!r.ok){document.getElementById('error').textContent='Forbidden: please login as dealer';return}
+      const rows=await r.json();
+      const tbody=document.getElementById('uploads');
+      tbody.innerHTML='';
+      rows.forEach(x=>{
+        const tr=document.createElement('tr');
+        const available=(x.available_quantity??x.quantity);
+        tr.innerHTML=`<td>${x.material}</td><td>${available}</td><td>${x.unit}</td><td>${x.location||''}</td><td>${new Date(x.created_at).toLocaleString()}</td>`;
+        tbody.appendChild(tr);
+      });
+    }
+    async function loadOrders(){
+      const r=await fetch('/api/dealer/orders',{headers:{Authorization:'Bearer '+token()}});
+      const rows=await r.json();
+      const tbody=document.getElementById('orders');
+      tbody.innerHTML='';
+      rows.forEach(x=>{
+        const tr=document.createElement('tr');
+        const actions = x.status==='requested' ? `<button onclick='updateOrder(${x.id},"accepted")'>Accept</button> <button onclick='updateOrder(${x.id},"rejected")'>Reject</button>` : '';
+        tr.innerHTML=`<td>${x.customer_name}</td><td>${x.material}</td><td>${x.quantity}</td><td>${x.status}</td><td>${actions}</td>`;
+        tbody.appendChild(tr);
+      });
+    }
+    async function updateOrder(id,status){
+      const r=await fetch('/api/dealer/orders/'+id+'/status',{method:'PATCH',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token()},body:JSON.stringify({status})});
+      if(!r.ok) alert('Update failed'); else {loadOrders(); loadUploads();}
+    }
+    document.getElementById('form').addEventListener('submit',async(e)=>{
+      e.preventDefault();
+      const material=document.getElementById('material').value;
+      const quantity=document.getElementById('quantity').value;
+      const unit=document.getElementById('unit').value;
+      const location=document.getElementById('location').value;
+      const r=await fetch('/api/dealer/uploads',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token()},body:JSON.stringify({material,quantity,unit,location})});
+      const data=await r.json();
+      if(!r.ok){document.getElementById('error').textContent=data.error||'Upload failed';return}
+      document.getElementById('error').textContent='';
+      loadUploads();
+    });
+    if(!token()) location.href='/login-dealer.html';
+    loadUploads();
+    loadOrders();
+  </script>
+</body>
+</html>

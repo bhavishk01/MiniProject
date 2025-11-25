@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Customer Login</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body class="bg-earth">
+  <div class="bg-cover"></div>
+  <div class="site-header"><div class="container nav"><span class="brand">EarthLink</span><span class="spacer"></span><a href="/">Home</a><a href="/customer-market.html">Marketplace</a><a href="/customer-report.html">Report</a></div></div>
+  <div class="container"><div class="card card-glass">
+    <h2>Customer Login</h2>
+    <div class="tabs">
+      <button id="tab-login">Login</button>
+      <button id="tab-register">Register</button>
+    </div>
+    <form id="login">
+      <input type="email" id="login-email" placeholder="Email" required />
+      <input type="password" id="login-password" placeholder="Password" required />
+      <button type="submit">Login</button>
+      <div class="error" id="login-error"></div>
+    </form>
+    <form id="register" style="display:none">
+      <div class="row">
+        <input type="text" id="reg-name" placeholder="Name" required />
+      </div>
+      <input type="email" id="reg-email" placeholder="Email" required />
+      <input type="password" id="reg-password" placeholder="Password" required />
+      <button type="submit">Register</button>
+      <div class="error" id="reg-error"></div>
+    </form>
+  </div></div>
+  <script>
+    const tabLogin=document.getElementById('tab-login');
+    const tabRegister=document.getElementById('tab-register');
+    const loginForm=document.getElementById('login');
+    const registerForm=document.getElementById('register');
+    tabLogin.onclick=()=>{loginForm.style.display='block';registerForm.style.display='none'};
+    tabRegister.onclick=()=>{loginForm.style.display='none';registerForm.style.display='block'};
+    loginForm.addEventListener('submit',async(e)=>{
+      e.preventDefault();
+      const email=document.getElementById('login-email').value;
+      const password=document.getElementById('login-password').value;
+      const r=await fetch('/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password,role:'customer'})});
+      const data=await r.json();
+      if(!r.ok){document.getElementById('login-error').textContent=data.error||'Login failed';return}
+      localStorage.setItem('token',data.token);localStorage.setItem('role','customer');
+      location.href='/customer-market.html';
+    });
+    registerForm.addEventListener('submit',async(e)=>{
+      e.preventDefault();
+      const name=document.getElementById('reg-name').value;
+      const email=document.getElementById('reg-email').value;
+      const password=document.getElementById('reg-password').value;
+      const r=await fetch('/api/auth/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,email,password})});
+      const data=await r.json();
+      if(!r.ok){document.getElementById('reg-error').textContent=data.error||'Register failed';return}
+      localStorage.setItem('token',data.token);localStorage.setItem('role','customer');
+      location.href='/customer-market.html';
+    });
+  </script>
+</body>
+</html>

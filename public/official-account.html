@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Official Account Settings</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body class="bg-earth">
+  <div class="bg-cover"></div>
+  <div class="site-header"><div class="container nav"><span class="brand">EarthLink</span><span class="spacer"></span><a href="/">Home</a><a href="/official-dashboard.html">Dashboard</a></div></div>
+  <div class="container">
+    <p><a href="/">Home</a> | <a href="/official-dashboard.html">Dashboard</a></p>
+    <div class="card">
+      <h3>Change Password</h3>
+      <div class="error" id="perr"></div>
+      <div class="ok" id="pok"></div>
+      <input type="password" id="current_password" placeholder="Current password" />
+      <input type="password" id="new_password" placeholder="New password" />
+      <button id="pbtn">Update Password</button>
+    </div>
+    <div class="card">
+      <h3>Change Email</h3>
+      <div class="error" id="eerr"></div>
+      <div class="ok" id="eok"></div>
+      <input type="password" id="email_password" placeholder="Current password" />
+      <input type="email" id="new_email" placeholder="New email" />
+      <button id="ebtn">Update Email</button>
+    </div>
+  </div>
+  <script>
+    function token(){return localStorage.getItem('token')||''}
+    if(localStorage.getItem('role')!=='official' || !token()) location.href='/login-official.html';
+    document.getElementById('pbtn').onclick=async()=>{
+      const body={current_password:document.getElementById('current_password').value,new_password:document.getElementById('new_password').value};
+      const r=await fetch('/api/me/password',{method:'PATCH',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token()},body:JSON.stringify(body)});
+      const data=await r.json();
+      if(!r.ok){document.getElementById('perr').textContent=data.error||'Update failed';document.getElementById('pok').textContent=''}else{document.getElementById('pok').textContent='Password updated';document.getElementById('perr').textContent=''}
+    };
+    document.getElementById('ebtn').onclick=async()=>{
+      const body={current_password:document.getElementById('email_password').value,new_email:document.getElementById('new_email').value};
+      const r=await fetch('/api/me/email',{method:'PATCH',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token()},body:JSON.stringify(body)});
+      const data=await r.json();
+      if(!r.ok){document.getElementById('eerr').textContent=data.error||'Update failed';document.getElementById('eok').textContent=''}else{document.getElementById('eok').textContent='Email updated';document.getElementById('eerr').textContent=''}
+    };
+  </script>
+</body>
+</html>
