@@ -4,14 +4,14 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Dealer Dashboard</title>
-  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body class="bg-earth">
   <div class="bg-cover"></div>
-  <div class="site-header"><div class="container nav"><span class="brand">EarthLink</span><span class="spacer"></span><a href="/">Home</a><a href="/customer-market.html">Marketplace</a></div></div>
+  <div class="site-header"><div class="container nav"><span class="brand">EarthLink</span><span class="spacer"></span><a href="index.html">Home</a><a href="customer-market.html">Marketplace</a></div></div>
   <div class="container">
     <h2>Dealer Dashboard</h2>
-    <p><a href="/">Home</a></p>
+    <p><a href="index.html">Home</a></p>
     <div>
       <h3>Upload Mining Data</h3>
       <div class="error" id="error"></div>
@@ -46,7 +46,7 @@
   </div>
   <script>
     function token(){return localStorage.getItem('token')||''}
-    if(localStorage.getItem('role')!=='dealer') location.href='/login-dealer.html';
+    if(localStorage.getItem('role')!=='dealer') location.href='login-dealer.html';
     async function loadUploads(){
       const r=await fetch('/api/dealer/uploads',{headers:{Authorization:'Bearer '+token()}});
       if(!r.ok){document.getElementById('error').textContent='Forbidden: please login as dealer';return}

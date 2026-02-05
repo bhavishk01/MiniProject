@@ -4,14 +4,16 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Official Dashboard</title>
-  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body class="bg-earth">
   <div class="bg-cover"></div>
-  <div class="site-header"><div class="container nav"><span class="brand">EarthLink</span><span class="spacer"></span><a href="/">Home</a><a href="/official-dealer-approvals.html">Dealer Approvals</a><a href="/official-account.html">Account</a></div></div>
+  <div class="site-header"><div class="container nav"><span class="brand">EarthLink</span><span class="spacer"></span><a href="index.html">Home</a><a href="official-dealer-approvals.html">Dealer Approvals</a><a href="official-account.html">Account</a></div></div>
   <div class="container">
     <h2>Government Official Dashboard</h2>
-    <p><a href="/">Home</a> | <a href="/official-account.html">Account</a> | <a href="/official-dealer-approvals.html">Dealer Approvals</a></p>
+    <p><a href="index.html">Home</a> | <a href="official-account.html">Account</a> | <a href="official-dealer-approvals.html">Dealer Approvals</a></p>
     <h3>Illegal Mining Reports</h3>
     <div class="actions"><label>Location</label><input id="repLoc" placeholder="Filter location" /><button onclick="loadReports()">Apply</button></div>
     <table>

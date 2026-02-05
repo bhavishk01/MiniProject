@@ -4,19 +4,21 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Report Illegal Mining</title>
-  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body class="bg-earth">
   <div class="bg-cover"></div>
-  <div class="site-header"><div class="container nav"><span class="brand">EarthLink</span><span class="spacer"></span><a href="/">Home</a><a href="/customer-market.html">Marketplace</a><a href="/customer-report.html">Report</a></div></div>
+  <div class="site-header"><div class="container nav"><span class="brand">EarthLink</span><span class="spacer"></span><a href="index.html">Home</a><a href="customer-market.html">Marketplace</a><a href="customer-report.html">Report</a></div></div>
   <div class="container">
     <h2>Report Illegal Mining</h2>
-    <p><a href="/customer-market.html">Back to Marketplace</a></p>
+    <p><a href="customer-market.html">Back to Marketplace</a></p>
     <form id="form">
       <textarea id="description" placeholder="Describe the incident"></textarea>
-      <input type="text" id="location" placeholder="Location" />
+      <input type="text" id="location" placeholder="Location Name (e.g. Near River Bank)" />
+      <div id="map" style="height: 300px; width: 100%; margin-bottom: 1rem; border-radius: 8px;"></div>
       <div>
-        <button type="button" id="geo">Use Current Location</button>
+        <button type="button" id="geo">Find My Location</button>
+        <span id="coord-display" style="font-size: 0.9em; margin-left: 10px; color: #666;">Tap map to set location</span>
       </div>
       <input type="file" id="photo" accept="image/*" />
       <button type="submit">Submit Report</button>

@@ -4,11 +4,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Customer Login</title>
-  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body class="bg-earth">
   <div class="bg-cover"></div>
-  <div class="site-header"><div class="container nav"><span class="brand">EarthLink</span><span class="spacer"></span><a href="/">Home</a><a href="/customer-market.html">Marketplace</a><a href="/customer-report.html">Report</a></div></div>
+  <div class="site-header"><div class="container nav"><span class="brand">EarthLink</span><span class="spacer"></span><a href="index.html">Home</a><a href="customer-market.html">Marketplace</a><a href="customer-report.html">Report</a></div></div>
   <div class="container"><div class="card card-glass">
     <h2>Customer Login</h2>
     <div class="tabs">
@@ -46,7 +46,7 @@
       const data=await r.json();
       if(!r.ok){document.getElementById('login-error').textContent=data.error||'Login failed';return}
       localStorage.setItem('token',data.token);localStorage.setItem('role','customer');
-      location.href='/customer-market.html';
+      location.href='customer-market.html';
     });
     registerForm.addEventListener('submit',async(e)=>{
       e.preventDefault();

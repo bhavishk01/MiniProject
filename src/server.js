@@ -3,6 +3,7 @@ const path = require('path')
 const cors = require('cors')
 const db = require('./db')
 const { signToken, requireAuth, hashPassword, verifyPassword } = require('./auth')
+const bcrypt = require('bcryptjs')
 const multer = require('multer')
 const fs = require('fs')
 
@@ -19,7 +20,12 @@ if (!fs.existsSync(reportsDir)) fs.mkdirSync(reportsDir)
 const licensesDir = path.join(uploadsDir, 'licenses')
 if (!fs.existsSync(licensesDir)) fs.mkdirSync(licensesDir)
 
-app.use('/uploads', express.static(uploadsDir))
+app.use('/uploads', (req, res, next) => {
+  if (req.path.startsWith('/licenses/')) {
+    return res.status(403).send('Access denied');
+  }
+  next();
+}, express.static(uploadsDir));
 app.use(express.static(publicDir))
 
 const storage = multer.diskStorage({
@@ -117,7 +123,7 @@ async function handleDealerApply(req, res) {
   if (existingApp) return res.status(409).json({ error: 'Application already pending' })
   const hash = await hashPassword(password)
   const created_at = new Date().toISOString()
-  const license_path = req.file ? ['uploads','licenses',req.file.filename].join('/') : null
+  const license_path = req.file ? req.file.filename : null
   const info = db.prepare('INSERT INTO dealer_applications (name,email,password_hash,company,license_path,status,created_at) VALUES (?,?,?,?,?,?,?)')
     .run(name, email, hash, company || null, license_path, 'pending', created_at)
   res.json({ application_id: info.lastInsertRowid })
@@ -294,6 +300,17 @@ app.patch('/api/me/email', requireAuth(), (req, res) => {
     db.prepare('UPDATE users SET email = ? WHERE id = ?').run(new_email, req.user.id)
     res.json({ ok: true })
   }).catch(() => res.status(500).json({ error: 'Error verifying password' }))
+})
+
+app.get('/api/admin/license/:filename', requireAuth('official'), (req, res) => {
+  const filename = req.params.filename
+  const filepath = path.join(licensesDir, filename)
+  if (!filepath.startsWith(licensesDir)) return res.status(403).send('Invalid path')
+  if (fs.existsSync(filepath)) {
+    res.sendFile(filepath)
+  } else {
+    res.status(404).send('Not found')
+  }
 })
 
 const PORT = process.env.PORT || 3000

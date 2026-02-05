@@ -4,14 +4,14 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Dealer Approvals</title>
-  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body class="bg-earth">
   <div class="bg-cover"></div>
-  <div class="site-header"><div class="container nav"><span class="brand">EarthLink</span><span class="spacer"></span><a href="/">Home</a><a href="/official-dashboard.html">Dashboard</a></div></div>
+  <div class="site-header"><div class="container nav"><span class="brand">EarthLink</span><span class="spacer"></span><a href="index.html">Home</a><a href="official-dashboard.html">Dashboard</a></div></div>
   <div class="container">
     <h2>Dealer Applications</h2>
-    <p><a href="/">Home</a> | <a href="/official-dashboard.html">Dashboard</a></p>
+    <p><a href="index.html">Home</a> | <a href="official-dashboard.html">Dashboard</a></p>
     <div>
       <label>Status</label>
       <select id="status">
@@ -36,7 +36,7 @@
       rows.innerHTML='';
       data.forEach(x=>{
         const tr=document.createElement('tr');
-        const license=x.license_path?`<a target='_blank' href='/${x.license_path}'>View</a>`:'';
+        const license=x.license_path?`<a target='_blank' href='/api/admin/license/${x.license_path}'>View</a>`:'';
         const action=status==='pending'?`<button onclick='update(${x.id},"approved")'>Approve</button><button onclick='update(${x.id},"rejected")'>Reject</button>`:'';
         tr.innerHTML=`<td>${x.name}</td><td>${x.email}</td><td>${x.company||''}</td><td>${license}</td><td>${new Date(x.created_at).toLocaleString()}</td><td>${action}</td>`;
         rows.appendChild(tr);
